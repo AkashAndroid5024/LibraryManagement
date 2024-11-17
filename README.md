@@ -33,12 +33,13 @@ A **Library Management System** built using **Java**, **Hibernate**, and **MySQL
 ---
 
 ## Project Structure 🗂️
-src/main/java/org/AJP_Akash/ ├── model/ # Entity classes (Book, Member, Transaction) 
-                             ├── dao/ # Data Access Objects (DAO) for database operations 
-                             ├── service/ # Business logic and service classes 
-                             ├── config/ # Hibernate utility configuration 
-                             ├── dto/ # Data Transfer Objects (if applicable) 
-                             └── App.java # Main class for running the application
+src/main/java/org/AJP_Akash/ <br>
+                             ├── model/ # Entity classes (Book, Member, Transaction) <br>
+                             ├── dao/ # Data Access Objects (DAO) for database operations<br> 
+                             ├── service/ # Business logic and service classes <br>
+                             ├── config/ # Hibernate utility configuration <br>
+                             ├── dto/ # Data Transfer Objects (if applicable) <br>
+                             └── App.java # Main class for running the application<br>
 
 ---
 
