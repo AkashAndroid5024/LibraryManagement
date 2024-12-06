@@ -1,30 +1,45 @@
 package org.AJP_Akash.model;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "transactions")
 public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private int transactionId;
 
     @ManyToOne
+    @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
     @ManyToOne
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    private Date issueDate;
-    private Date returnDate;
+    @Column(nullable = false)
+    private LocalDateTime issueDate;
 
-    public int getId() {
-        return id;
+    @Column
+    private LocalDateTime returnDate;
+
+    // Constructors
+    public Transaction() {}
+
+    public Transaction(Book book, Member member, LocalDateTime issueDate) {
+        this.book = book;
+        this.member = member;
+        this.issueDate = issueDate;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    // Getters and Setters
+    public int getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(int transactionId) {
+        this.transactionId = transactionId;
     }
 
     public Book getBook() {
@@ -43,31 +58,19 @@ public class Transaction {
         this.member = member;
     }
 
-    public Date getIssueDate() {
+    public LocalDateTime getIssueDate() {
         return issueDate;
     }
 
-    public void setIssueDate(Date issueDate) {
+    public void setIssueDate(LocalDateTime issueDate) {
         this.issueDate = issueDate;
     }
 
-    public Date getReturnDate() {
+    public LocalDateTime getReturnDate() {
         return returnDate;
     }
 
-    public void setReturnDate(Date returnDate) {
+    public void setReturnDate(LocalDateTime returnDate) {
         this.returnDate = returnDate;
     }
-
-    @Override
-    public String toString() {
-        return "Transaction{" +
-                "id=" + id +
-                ", book=" + book +
-                ", member=" + member +
-                ", issueDate=" + issueDate +
-                ", returnDate=" + returnDate +
-                '}';
-    }
 }
-

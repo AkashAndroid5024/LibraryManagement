@@ -6,80 +6,94 @@ import org.AJP_Akash.dao.TransactionDAO;
 import org.AJP_Akash.model.Book;
 import org.AJP_Akash.model.Member;
 import org.AJP_Akash.model.Transaction;
-
 import java.util.List;
+import java.time.LocalDateTime;
+
 
 public class TransactionService {
+    private final TransactionDAO transactionDAO = new TransactionDAO();
+    private final BookService bookService = new BookService();
+    private final MemberService memberService = new MemberService();
 
-    private final TransactionDAO transactionDAO;
-    private final BookDAO bookDAO;
-    private final MemberDAO memberDAO;
-
-    public TransactionService() {
-        transactionDAO = new TransactionDAO();
-        bookDAO = new BookDAO();
-        memberDAO = new MemberDAO();
-    }
-
-    // Issue a book to a member
+    // Issue a book
     public void issueBook(int bookId, int memberId) {
-        Book book = bookDAO.getBookById(bookId);
-        Member member = memberDAO.getMemberById(memberId);
+        try {
+            Book book = bookService.getBookById(bookId);
+            if (book == null || !book.isAvailability()) {
+                throw new RuntimeException("Book is not available or doesn't exist.");
+            }
 
-        if (book != null && member != null && book.isAvailable()) {
-            // Create a transaction entry for issuing the book
-            Transaction transaction = new Transaction();
-            transaction.setBook(book);
-            transaction.setMember(member);
-            transaction.setIssueDate(new java.util.Date());
+            Member member = memberService.getMemberById(memberId);
+            if (member == null) {
+                throw new RuntimeException("Member does not exist.");
+            }
 
-            // Save the transaction
-            transactionDAO.issueBook(transaction);
-
-            // Mark the book as not available
-            book.setAvailable(false);
-            bookDAO.updateBook(book);
-        } else {
-            System.out.println("Either the book or the member doesn't exist, or the book is already issued.");
+            Transaction transaction = new Transaction(book, member, LocalDateTime.now());
+            transactionDAO.addTransaction(transaction);
+            bookService.updateAvailability(bookId, false);
+            System.out.println("Book issued successfully!");
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
     // Return a book
     public void returnBook(int bookId, int memberId) {
-        Book book = bookDAO.getBookById(bookId);
-        Member member = memberDAO.getMemberById(memberId);
-
-        if (book != null && member != null) {
-            // Get all transactions for the book and member
-            List<Transaction> transactions = transactionDAO.getTransactionsForBookAndMember(bookId, memberId);
-
-            boolean returned = false;
-
-            // Process each transaction to find any that haven't been returned
-            for (Transaction transaction : transactions) {
-                if (transaction.getReturnDate() == null) { // Check if it's an open transaction
-                    // Mark the transaction as returned
-                    transaction.setReturnDate(new java.util.Date());
-                    transactionDAO.updateTransaction(transaction);
-                    returned = true;
-                }
+        try {
+            Book book = bookService.getBookById(bookId);
+            Member member = memberService.getMemberById(memberId);
+            if (book == null || member == null) {
+                throw new RuntimeException("Invalid book or member ID.");
             }
 
-            if (returned) {
-                // Mark the book as available again if at least one transaction was returned
-                book.setAvailable(true);
-                bookDAO.updateBook(book);
-                System.out.println("Book returned successfully.");
-            } else {
-                System.out.println("No outstanding transaction found for this book and member.");
+            Transaction transaction = transactionDAO.getActiveTransactionForBookAndMember(bookId, memberId);
+            if (transaction == null) {
+                throw new RuntimeException("No matching issue record found.");
             }
-        } else {
-            System.out.println("Either the book or the member doesn't exist.");
+
+            transaction.setReturnDate(LocalDateTime.now());
+            transactionDAO.updateTransaction(transaction); // Persist the update
+            bookService.updateAvailability(bookId, true);
+            System.out.println("Book returned successfully!");
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
-    // Get all transactions
-    public List<Transaction> getAllTransactions() {
-        return transactionDAO.getTransactions();
+    // Show all transactions
+    public void showAllTransactions() {
+        List<Transaction> transactions = transactionDAO.getAllTransactions();
+        if (transactions.isEmpty()) {
+            System.out.println("No transactions found.");
+        } else {
+            System.out.println("Transaction records:");
+            for (Transaction transaction : transactions) {
+                System.out.printf("Transaction ID: %d, Book Id: %d, Book: %s, Member Id: %d, Member: %s, Issue Date: %s, Return Date: %s%n",
+                        transaction.getTransactionId(),
+                        transaction.getBook().getBookId(),
+                        transaction.getBook().getTitle(),
+                        transaction.getMember().getMemberId(),
+                        transaction.getMember().getName(),
+                        transaction.getIssueDate(),
+                        (transaction.getReturnDate() != null ? transaction.getReturnDate() : "Not Returned Yet"));
+            }
+        }
+    }
+
+    public List<Transaction> getTransactionsByBookId(int bookId) {
+        // Retrieve all transactions related to a particular book
+        // This could involve querying the database to get transactions where the book ID matches
+        return transactionDAO.findByBookId(bookId);
+    }
+
+    public List<Transaction> getTransactionsByMemberId(int memberId) {
+        // Retrieve all transactions related to a particular member
+        // This could involve querying the database to get transactions where the member ID matches
+        return transactionDAO.findByMemberId(memberId);
+    }
+
+    public void deleteTransaction(int transactionId) {
+        // Delete the transaction by its ID
+        transactionDAO.deleteById(transactionId);
     }
 }
