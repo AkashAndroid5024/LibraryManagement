@@ -110,5 +110,7 @@ Library Management System Menu:
 5. Show all books
 6. Show all members
 7. Show all transactions
-8. Exit
+8. Delete a book
+9. Delete a member
+10. Exit
 ```
