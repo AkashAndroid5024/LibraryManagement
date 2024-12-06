@@ -13,7 +13,7 @@ A **Library Management System** built using **Java**, **Hibernate**, and **MySQL
 5. **View All Books**: Display all books in the library with their details.
 6. **View All Members**: Display all registered members and their information.
 7. **View All Transactions**: Show the history of all book issues and returns.
-8. **Delete a Book**: Delete the book if it is not available and does not have any active transactions.
+8. **Delete a Book**: Delete the book if it is available and does not have any active transactions.
 9. **Delete a Member**: Delete the member if it does not have any active transactions.
 
 ---
